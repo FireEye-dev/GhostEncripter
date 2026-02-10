@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Emoji Smuggling · Anti WhatsApp</title>
+<style>
+body {
+  background:#0f1220;
+  color:#eee;
+  font-family: monospace;
+  padding:40px;
+}
+textarea, input {
+  width:100%;
+  background:#1b1f3b;
+  color:#fff;
+  border:1px solid #333;
+  padding:10px;
+  margin-bottom:15px;
+}
+button {
+  background:#6c63ff;
+  border:none;
+  padding:10px 18px;
+  color:white;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>🕵️ Emoji Smuggling · Anti-WhatsApp</h2>
+
+<p>Mensaje secreto</p>
+<textarea id="secret"></textarea>
+
+<p>Texto + emojis de camuflaje</p>
+<input id="cover" value="Tu mensaje se camuflara en lo que pongas aqui  😄🔥✨👍">
+
+<button onclick="encode()">Cifrar</button>
+<button onclick="decode()">Descifrar</button>
+
+<p>Resultado visible</p>
+<textarea id="output"></textarea>
+
+<script>
+const ZW_ONE  = "\u200B"; // 1
+const ZW_ZERO = "\u200C"; // 0
+const ZW_SEP  = "\u200D"; // separador
+
+function textToBinary(text) {
+  const bytes = new TextEncoder().encode(text);
+  return Array.from(bytes)
+    .map(b => b.toString(2).padStart(8,"0"))
+    .join(ZW_SEP);
+}
+
+function binaryToText(bin) {
+  const bytes = bin.split(ZW_SEP).map(b => parseInt(b,2));
+  return new TextDecoder().decode(new Uint8Array(bytes));
+}
+
+function encode() {
+  const secretText = secret.value;
+  const coverText = cover.value;
+
+  if (!secretText || !coverText) return;
+
+  const binary = textToBinary(secretText);
+
+  // Convertimos a ZWC
+  let zw = "";
+  for (const b of binary) {
+    zw += b === "1" ? ZW_ONE : b === "0" ? ZW_ZERO : ZW_SEP;
+  }
+
+  // Anti-WhatsApp: redundancia x2
+  zw = zw + zw;
+
+  const chars = Array.from(coverText);
+  const chunkSize = Math.ceil(zw.length / chars.length);
+
+  let result = "";
+  let index = 0;
+
+  for (const ch of chars) {
+    const chunk = zw.slice(index, index + chunkSize);
+    result += ch + chunk;
+    index += chunkSize;
+  }
+
+  output.value = result;
+}
+
+function decode() {
+  const data = output.value;
+
+  let zw = "";
+  for (const ch of data) {
+    if (ch === ZW_ONE || ch === ZW_ZERO || ch === ZW_SEP) {
+      zw += ch;
+    }
+  }
+
+  // Quitamos redundancia
+  zw = zw.slice(0, zw.length / 2);
+
+  let binary = "";
+  for (const z of zw) {
+    if (z === ZW_ONE) binary += "1";
+    else if (z === ZW_ZERO) binary += "0";
+    else binary += ZW_SEP;
+  }
+
+  try {
+    secret.value = binaryToText(binary);
+  } catch {
+    alert("Mensaje no recuperable");
+  }
+}
+</script>
+
+</body>
+</html>
