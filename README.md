@@ -65,7 +65,7 @@ sudo apt install python3 iproute2
 
  INSTALACIÓN
 
-git clone https://github.com/Ramver66/GhostEnctipter
+git clone https://github.com/FireEye-dev/GhostEncripter
 cd GhosterEncripter
 chmod +x GhostEncripter.sh
 ./GhostEncripter.sh
